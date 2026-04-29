@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Love Letter 💌</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: #f5f1e6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Georgia, serif;
+    overflow: hidden;
+}
+
+/* envelope */
+.envelope {
+    width: 320px;
+    height: 220px;
+    position: relative;
+    cursor: pointer;
+    perspective: 1000px;
+}
+
+/* base */
+.base {
+    width: 100%;
+    height: 100%;
+    background: #e6d3a3;
+    position: absolute;
+    bottom: 0;
+    border-radius: 10px;
+    z-index: 2;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+}
+
+/* flap */
+.flap {
+    width: 0;
+    height: 0;
+    border-left: 160px solid transparent;
+    border-right: 160px solid transparent;
+    border-top: 110px solid #d9c08a;
+    position: absolute;
+    top: 0;
+    transform-origin: top;
+    transition: transform 0.8s ease;
+    z-index: 4;
+}
+
+/* letter */
+.letter {
+    width: 280px;
+    height: 180px;
+    background: #fff5dc;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 100%); /* fully hidden */
+    bottom: 0;
+    border-radius: 10px;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    z-index: 1;
+    transition: transform 1s ease;
+}
+
+/* text */
+.text {
+    font-size: 1.2rem;
+    color: #5a4632;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* birds */
+.birds {
+    margin-top: 15px;
+    font-size: 1.8rem;
+    animation: sway 2s infinite alternate;
+}
+
+@keyframes sway {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+}
+
+/* OPEN STATE */
+.envelope.open .flap {
+    transform: rotateX(180deg);
+}
+
+.envelope.open .letter {
+    transform: translate(-50%, -140px); /* comes out cleanly */
+    z-index: 3;
+    transition-delay: 0.3s;
+}
+
+/* floating hearts */
+.heart {
+    position: absolute;
+    color: #ff3b6b;
+    font-size: 18px;
+    animation: floatUp 4s linear forwards;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-200px) scale(1.2); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="envelope" onclick="openLetter(this)">
+    <div class="flap"></div>
+    <div class="base"></div>
+
+    <div class="letter">
+        <div class="text" id="text"></div>
+        <div class="birds">🕊️💞🕊️</div>
+    </div>
+</div>
+
+<script>
+const message =
+"❤️ THANK YOU SO MUCH MY BABY ❤️\n\n THANK YOU MAKING MY DAY BETTER \n\n HOPE YOU ENJOY YOUR DAY 💗";
+
+let opened = false;
+
+function openLetter(el) {
+    if (opened) return;
+    opened = true;
+
+    el.classList.add("open");
+
+    playSound();
+    startTyping();
+    startHearts();
+}
+
+/* typing */
+function startTyping() {
+    const target = document.getElementById("text");
+    let i = 0;
+
+    function type() {
+        if (i < message.length) {
+            target.innerHTML += message.charAt(i);
+            i++;
+            setTimeout(type, 40);
+        }
+    }
+    type();
+}
+
+/* hearts */
+function startHearts() {
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerHTML = "❤️";
+
+        heart.style.left = Math.random() * window.innerWidth + "px";
+        heart.style.top = "70%";
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 4000);
+    }, 250);
+}
+
+/* sound */
+function playSound() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 1);
+
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1);
+}
+</script>
+
+</body>
+</html>
